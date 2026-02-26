@@ -54,10 +54,33 @@ def berechne_makros(ziel_kalorien, gewicht):
     return {"Protein (g)": round(protein_gramm), "Fett (g)": round(fett_gramm), "Kohlenhydrate (g)": round(kohlenhydrate_gramm)}
 
 def finde_lebensmittel(name_teil, datenbank):
-    if name_teil:
+    if datenbank is not None and name_teil:
         suchbegriff = name_teil.lower()
-        ergebnisse = datenbank[datenbank['Lebensmittelname_Deutsch'].str.lower().str.contains(suchbegriff, na=False)]
+        
+        # 1. Finde alle Zeilen, die den Suchbegriff enthalten
+        ergebnisse = datenbank[datenbank['Lebensmittelname_Deutsch'].str.lower().str.contains(suchbegriff, na=False)].copy()
+        
+        # 2. Erstelle eine neue Spalte für die Sortierung
+        #    - Priorität 1 für exakte Treffer
+        #    - Priorität 2 für Treffer, die mit dem Begriff beginnen
+        #    - Priorität 3 für alle anderen Treffer
+        def sortier_prioritaet(name):
+            name_lower = name.lower()
+            if name_lower == suchbegriff:
+                return 1
+            elif name_lower.startswith(suchbegriff):
+                return 2
+            else:
+                return 3
+        
+        if not ergebnisse.empty:
+            ergebnisse['sort_prio'] = ergebnisse['Lebensmittelname_Deutsch'].apply(sortier_prioritaet)
+            
+            # 3. Sortiere nach der neuen Prioritätsspalte und dann alphabetisch
+            ergebnisse = ergebnisse.sort_values(by=['sort_prio', 'Lebensmittelname_Deutsch'])
+        
         return ergebnisse
+        
     return pd.DataFrame()
 
 # ==============================================================================
