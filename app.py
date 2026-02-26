@@ -2,12 +2,15 @@ import streamlit as st
 import pandas as pd
 
 # ==============================================================================
-# DATENBANK LADEN
+# DATENBANK LADEN (mit Spaltennamen-Bereinigung)
 # ==============================================================================
 @st.cache_data
 def lade_datenbank():
     try:
         df = pd.read_excel('lebensmittel.xlsx')
+        # === NEU: Spaltennamen bereinigen ===
+        # Entfernt führende/nachfolgende Leerzeichen von allen Spaltennamen
+        df.columns = df.columns.str.strip()
         return df
     except FileNotFoundError:
         st.error("FEHLER: Die Datei 'lebensmittel.xlsx' wurde nicht gefunden.")
