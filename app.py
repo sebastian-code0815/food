@@ -71,17 +71,32 @@ if st.button("Bedarf berechnen"):
     leistungsumsatz = berechne_leistungsumsatz(grundumsatz, aktivitaetslevel)
     st.success(f"Dein täglicher Kalorienbedarf: **{round(leistungsumsatz)} kcal**")
     st.info(f"Dein Grundumsatz: {round(grundumsatz)} kcal")
-
+    
+# --- TEIL 2: LEBENSMITTEL-SUCHER ---
 st.divider()
 
-# --- TEIL 2: LEBENSMITTEL-SUCHER ---
 st.header("2. Finde Lebensmittel in der Datenbank")
+
 suchbegriff = st.text_input("Suche nach einem Lebensmittel (z.B. 'hähnchen' oder 'quark'):")
 
 if df_lebensmittel is not None:
-    such_ergebnisse = finde_lebensmittel(suchbegriff, df_lebensmittel)
-    st.write(f"Gefunden: **{len(such_ergebnisse)}** Einträge")
-    
-    # === KORRIGIERTE SPALTENNAMEN FÜR DIE ANZEIGE ===
-    # Wir verwenden die exakten Namen aus Ihrer Excel-Datei
-    st.dataframe(such_ergebnisse[['Lebensmittelname_Deutsch', 'Energie_kcal', 'Protein_g', 'Fett_g', 'Kohlenhydrate_g']])
+    # Nur suchen, wenn der Benutzer etwas eingegeben hat
+    if suchbegriff:
+        such_ergebnisse = finde_lebensmittel(suchbegriff, df_lebensmittel)
+        
+        st.write(f"Gefunden: **{len(such_ergebnisse)}** Einträge für '{suchbegriff}'")
+
+        # === NEUE PRÜFUNG: Nur anzeigen, wenn der DataFrame nicht leer ist ===
+        if not such_ergebnisse.empty:
+            # Spalten definieren, die wir anzeigen wollen
+            anzuzeigende_spalten = ['Lebensmittelname_Deutsch', 'Energie_kcal', 'Protein_g', 'Fett_g', 'Kohlenhydrate_g']
+            
+            # Sicherstellen, dass alle Spalten im DataFrame existieren
+            existierende_spalten = [col for col in anzuzeigende_spalten if col in such_ergebnisse.columns]
+            
+            st.dataframe(such_ergebnisse[existierende_spalten])
+        else:
+            st.warning("Keine passenden Lebensmittel gefunden.")
+    else:
+        # Nachricht, wenn noch nichts eingegeben wurde
+        st.info("Bitte gib einen Suchbegriff ein, um die Datenbank zu durchsuchen.")
