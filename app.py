@@ -48,6 +48,29 @@ def finde_lebensmittel(name_teil, datenbank):
         return ergebnisse
     return pd.DataFrame()
 
+
+def berechne_makros(ziel_kalorien, gewicht):
+    # 1. Protein berechnen (in Gramm)
+    protein_gramm = 2 * gewicht
+    protein_kcal = protein_gramm * 4
+
+    # 2. Fett berechnen (in Gramm)
+    fett_kcal = ziel_kalorien * 0.25
+    fett_gramm = fett_kcal / 9
+
+    # 3. Kohlenhydrate berechnen (der Rest)
+    rest_kcal = ziel_kalorien - protein_kcal - fett_kcal
+    kohlenhydrate_gramm = rest_kcal / 4
+
+    # Wir geben ein Dictionary mit den Ergebnissen zurück
+    return {
+        "Protein (g)": round(protein_gramm),
+        "Fett (g)": round(fett_gramm),
+        "Kohlenhydrate (g)": round(kohlenhydrate_gramm)
+    }
+
+
+
 # ==============================================================================
 # STREAMLIT OBERFLÄCHE
 # ==============================================================================
